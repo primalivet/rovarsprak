@@ -1,9 +1,10 @@
+import { IO, Identity } from 'ramda-fantasy'
 import { List, Map } from 'immutable-ext'
 import { isConsonant, formatConsonant } from './consonants'
 import compose from './utilities/compose'
 
 // createWordsList :: Event -> List
-const createWordsList = e => List(e.target.value.trim().split(' '))
+const createWordsList = event => List(event.target.value.trim().split(' '))
   .map(string => Map({ input: string }))
   .map(word => word.set('chars', List(word.get('input').split(''))))
   .map(word => word.set('output', word.get('chars')
@@ -11,15 +12,21 @@ const createWordsList = e => List(e.target.value.trim().split(' '))
   ))
 
 // createSentence :: List -> HTML
-const createSentence = l => l
+const createSentence = list => list
   .map(word =>
     `<span data-input="${word.get('input')}">${word.get('output')}</span>`
   )
   .join(' ')
 
+const nodeInnerHTML = selector => html => IO(() => {
+  document.querySelector(selector).innerHTML = html
+})
+
 const input = document.querySelector('.input')
-const preview = document.querySelector('.preview')
 
 input.addEventListener('keyup', e => {
-  preview.innerHTML = compose(createSentence, createWordsList)(e)
+  Identity(e)
+    .map(compose(createSentence, createWordsList))
+    .chain(nodeInnerHTML('.preview'))
+    .runIO()
 })

@@ -1,0 +1,56 @@
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+body, input{
+  font-family: monospace;
+  background: black;
+}
+
+.container {
+  position: fixed;
+  display: flex;
+  flex-flow: column;
+  justify-content: flex-end;
+  top: 1rem;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+}
+
+.history {
+  flex: 1 1 auto;
+  background: whitesmoke;
+}
+
+.preview {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 1rem;
+  background: whitesmoke;
+  border: none;
+  font-size: 24px;
+}
+
+.input {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 1rem;
+  background: white;
+  border: none;
+  font-size: 24px;
+}
+
+.info {
+  padding: 1rem;
+  color: white;
+  font-size: 24px;
+}

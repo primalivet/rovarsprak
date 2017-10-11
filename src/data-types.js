@@ -1,3 +1,25 @@
+export const Identity = x => ({
+  ap: I2 => I2.map(x),
+  chain: f => f(x),
+  map: f => Identity(f(x)),
+  fold: f => f(x),
+  toString: () => `Identity(${x})`
+})
+
+Identity.of = x => Identity(x)
+
+export const IO = fn => ({
+  chain (f) {
+    return IO(() => f(this.runIO()).runIO())
+  },
+  map (f) {
+    return IO(() => f(this.runIO()))
+  },
+  runIO: () => fn()
+})
+
+IO.of = x => IO(() => x)
+
 export const Either = {}
 
 const Right = x => ({

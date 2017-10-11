@@ -1,32 +1,47 @@
-import { IO, Identity } from 'ramda-fantasy'
 import { List, Map } from 'immutable-ext'
+import { Identity, IO } from './data-types'
 import { isConsonant, formatConsonant } from './consonants'
-import compose from './utilities/compose'
+import { compose, trace } from './utilities'
 
-// createWordsList :: Event -> List
-const createWordsList = event => List(event.target.value.trim().split(' '))
-  .map(string => Map({ input: string }))
-  .map(word => word.set('chars', List(word.get('input').split(''))))
-  .map(word => word.set('output', word.get('chars')
-    .map(char => isConsonant(char).fold(x => x, formatConsonant)).join('')
-  ))
+// createWordsListFromEvent :: Event -> List
+const createWordsListFromEvent = e =>
+  List(e.target.value.trim().split(' '))
+    .map(s => Map({ input: s }))
+    .map(w => w.set('chars', List(w.get('input').split(''))))
+    .map(w => w.set('output', w.get('chars')
+      .map(c => isConsonant(c).fold(v => v, formatConsonant)).join('')
+    ))
 
 // createSentence :: List -> HTML
-const createSentence = list => list
-  .map(word =>
-    `<span data-input="${word.get('input')}">${word.get('output')}</span>`
-  )
-  .join(' ')
+const createSentenceHTMLFromList = l =>
+  l
+    .map(word => `
+      <span data-input="${word.get('input')}">
+        ${word.get('output')}
+      </span>
+    `)
+    .join(' ')
 
-const nodeInnerHTML = selector => html => IO(() => {
+// setInnerHTML :: -> String -> HTML -> IO
+const setInnerHTML = selector => html => IO(() => {
   document.querySelector(selector).innerHTML = html
 })
 
-const input = document.querySelector('.input')
+// getNode :: String -> IO
+const getNode = selector =>
+  IO(() => document.querySelector(selector))
 
-input.addEventListener('keyup', e => {
-  Identity(e)
-    .map(compose(createSentence, createWordsList))
-    .chain(nodeInnerHTML('.preview'))
-    .runIO()
-})
+// addListener :: String -> Function -> DOM Node -> IO
+const addListener = type => fn => node =>
+  IO(() => node.addEventListener(type, fn))
+
+// handleEvent :: Event -> IO
+const handleEvent = e => Identity(e)
+  .map(compose(createSentenceHTMLFromList, createWordsListFromEvent))
+  .chain(setInnerHTML('.preview'))
+  .runIO()
+
+const bindInputListener = getNode('.input')
+  .chain(addListener('keyup')(handleEvent))
+
+bindInputListener.runIO()
